@@ -1,0 +1,21 @@
+#+title: Buf Play Test Code
+
+#+begin_src sclang
+
+~busy4.play;
+
+~verses.size;
+~verses.last;
+~incipits;
+~verses[9];
+~verses[18];
+~verses[19];
+
+
+[[10, "z"], [1, "x"]].sort({ | a, b | a[0] < b[0] });
+
+~verses1[9].play;
+~nor1.play;
+[~thy1, ~thy2, ~thy3] do: _.play;
+
+#+end_src
