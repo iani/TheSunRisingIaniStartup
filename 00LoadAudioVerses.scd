@@ -91,30 +91,60 @@ loadWav = { | p, num |
 	buffers;
 };
 Server.default waitForBoot: {
-	var buflist, window;
+	var buflist, window, listViews, selectionActions;
 	buflist = PathName(thisProcess.nowExecutingPath).pathOnly.folders.detect({ | p |
 		p.folderName == "audiofiles"
 	}).folders collect: { | p, num |
 		loadWav.(p, num);
 	};
+		/* // IMPORTANT: Need to do something like this here,
+			// in order ro run the code locally and share it to the Usrs in OSC
+				User.interpretSend("1000.rand;");
+		// what code should we interpret there? We want to set a global
+				variable to the list of buffers selected.
+				Perhaps use a new class. For example, class TheSunRising
+				For example something like:
+				User.interpretSend(
+					format(
+						"TheSunRising.addVerses(%)",
+						me.selection
+					);
+				One should first test this by posting the string to be interpreted
+				like this:
+					format(
+						"TheSunRising.addVerses(%)",
+						me.selection
+					).postln;
+				Try building this up from this simple example:
+					User.interpretSend(
+						format("%.size;", Array.rand(2, 10, 100))
+					);
+		*/
+	selectionActions = (1..4) collect: { | voiceIndex |
+		{ | me |
+			// me.selection.postln;
+			postln("(Voice" + voiceIndex + ":");
+			me.items[me.selection] do: { | v |
+				postln("   " + v)
+			};
+			")".postln;
+		}
+	};
 	window = 'The Sun Rising'.hlayout(
-		*(buflist.collect({ | b, voiceIndex |
+		*(listViews = buflist.collect({ | b, voiceIndex |
 			ListView().items_(verses)
 			.selectionMode_(\multi)
 			.enterKeyAction_({ | me |
 				me.selection.postln;
-			})
-			.selectionAction_({ | me |
-				// me.selection.postln;
-				me.items[me.selection] do: { | v |
-					postln("(Voice" + voiceIndex ++ "):" + v)
-				};
-			})
-			// .action_({ | me |
-			// 	me.items[me.value].postln;
-			// 	buflist[i][me.value].play;
-			// })
+			});
+			// .selectionAction_(nil);
 		}))
 	);
 	window.bounds = Rect(0, 0, 1225, 475);
+	{
+		listViews do: { | me | me.selection = [] };
+		listViews do: { | v, i | // activate action after clearing
+			v.selectionAction = selectionActions[i];
+		}
+	} defer: 0.1;
 };
