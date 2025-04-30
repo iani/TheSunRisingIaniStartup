@@ -1,0 +1,49 @@
+#+title: Readme
+
+To install your library and make sure it is loaded when the
+=User.enable(...)= command is executed, you should do the following:
+
+1. Create a folder in your own UserAppSupportDirectory, under =User/<yourSCUserId>=.
+   In my case this is here:
+   =/Users/iani/Library/Application Support/SuperCollider/Users/iani=
+   I have placed there both the scripts that I want to run and the files that I want to
+   load.  I wrote a script to load those files - and to store them under names
+   corresponding to the first word of each verse.
+   The script is somewhat complex, because it also creates a GUI, and tries
+   to make the poem as present as possible. In your case, you can write
+   something simpler.
+
+The relevant script is:
+https://github.com/iani/TheSunRisingIaniStartup/blob/master/00LoadAudioVerses.scd
+
+The other scripts were just for test. You can ignore them as they do not change
+anything in the workspace of sclang.
+
+2. You should also copy the startup folders of all the other users in the same place.
+   i.e.:
+   =/Users/iani/Library/Application Support/SuperCollider/Users/iani= (iani's startup files)
+   =/Users/iani/Library/Application Support/SuperCollider/Users/geodia= (geodia's startup files)
+   =/Users/iani/Library/Application Support/SuperCollider/Users/vasilis= (vasilis' startup files)
+...
+   (Penny: What is your user name?)
+
+Note that User will load these files when your user is created.
+The name of the folder should be *exactly* like your user name.
+=geodia=, =vasilis=, =kosmas= etc.
+
+You do not need to specify anything else about when to load.
+The files are loaded by User privately for each user,
+so all users must have these files in the Users directory above.
+
+The files are loaded when User.enable activates all the users
+that are in the Startup script.
+
+=/Users/iani/Library/Application Support/SuperCollider/startup/01UserSession4TheSunRising250423.scd=
+
+The contents of the file are:
+
+#+begin_src sclang
+User.enable("the_sun_rising2", 5, \iani, \geodia, \vasilis, \kosmas, \peny);
+#+end_src
+
+This starts a session with the 5 users, 5 seconds after sclang =Startup=.
