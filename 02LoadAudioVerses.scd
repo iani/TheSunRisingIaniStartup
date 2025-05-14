@@ -97,32 +97,42 @@ Server.default waitForBoot: {
 	}).folders collect: { | p, num |
 		loadWav.(p, num);
 	};
-		/* // IMPORTANT: Need to do something like this here,
-			// in order ro run the code locally and share it to the Usrs in OSC
-				User.interpretSend("1000.rand;");
+	/* // IMPORTANT: Need to do something like this here,
+		// in order ro run the code locally and share it to the Usrs in OSC
+		User.interpretSend("1000.rand;");
 		// what code should we interpret there? We want to set a global
-				variable to the list of buffers selected.
-				Perhaps use a new class. For example, class TheSunRising
-				For example something like:
-				User.interpretSend(
-					format(
-						"TheSunRising.addVerses(%)",
-						me.selection
-					);
-				One should first test this by posting the string to be interpreted
-				like this:
-					format(
-						"TheSunRising.addVerses(%)",
-						me.selection
-					).postln;
-				Try building this up from this simple example:
-					User.interpretSend(
-						format("%.size;", Array.rand(2, 10, 100))
-					);
-		*/
+		variable to the list of buffers selected.
+		Perhaps use a new class. For example, class TheSunRising
+		For example something like:
+		User.interpretSend(
+		format(
+		"TheSunRising.addVerses(%)",
+		me.selection
+		);
+		One should first test this by posting the string to be interpreted
+		like this:
+		format(
+		"TheSunRising.addVerses(%)",
+		me.selection
+		).postln;
+		Try building this up from this simple example:
+		User.interpretSend(
+		format("%.size;", Array.rand(2, 10, 100))
+		);
+	*/
+	// sounds funny for Enter, Space and backspace
+	SynthDef(\pinch, { |freq=330, ffreq=110, pos=0.0, amp=1.0|
+		var signal, env, conv, f1;
+		f1 = LFSaw.kr(ffreq * 0.001).range(0,1);
+		env = EnvGen.ar(Env.perc(0.01,0.1), doneAction: 2);
+		signal = SinOsc.ar(freq+SinOsc.ar(ffreq,0,freq)).fold(f1.neg,f1) * env;
+		conv = Limiter.ar(Convolution.ar(signal, Decay2.ar(Dust.ar(ffreq),0.01,f1/3)), 0.95);
+		Out.ar(0, Pan2.ar(signal, pos, amp))
+	}).add;
+
 	selectionActions = (1..4) collect: { | voiceIndex |
 		{ | me |
-			// me.selection.postln;
+			// postln("SELECTION:" me.selection);
 			postln("(Voice" + voiceIndex + ":");
 			me.items[me.selection] do: { | v |
 				postln("   " + v)
@@ -130,21 +140,23 @@ Server.default waitForBoot: {
 			")".postln;
 		}
 	};
-	window = 'The Sun Rising'.hlayout(
-		*(listViews = buflist.collect({ | b, voiceIndex |
-			ListView().items_(verses)
-			.selectionMode_(\multi)
-			.enterKeyAction_({ | me |
-				me.selection.postln;
-			});
-			// .selectionAction_(nil);
-		}))
-	);
-	window.bounds = Rect(0, 0, 1225, 475);
-	{
-		listViews do: { | me | me.selection = [] };
-		listViews do: { | v, i | // activate action after clearing
-			v.selectionAction = selectionActions[i];
-		}
-	} defer: 0.1;
+	if (User.localId === \iani) {
+		window = 'The Sun Rising'.hlayout(
+			*(listViews = buflist.collect({ | b, voiceIndex |
+				ListView().items_(verses)
+				.selectionMode_(\multi)
+				.enterKeyAction_({ | me |
+					me.selection.postln;
+				});
+				// .selectionAction_(nil);
+			}))
+		);
+		window.bounds = Rect(0, 0, 1225, 475);
+		{
+			listViews do: { | me | me.selection = [] };
+			listViews do: { | v, i | // activate action after clearing
+				v.selectionAction = selectionActions[i];
+			}
+		} defer: 0.1;
+	};
 };
